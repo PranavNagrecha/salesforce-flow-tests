@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FlowTest xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>A subflow test. The opportunity owner is inactive, so no reminder task should be created. Twin: T01, an active owner, where the task is created. The opportunity Id belongs to one org: replace the placeholder with a real open opportunity whose owner is inactive, and keep that record for tests only.</description>
+    <flowApiName>Sub_Create_Reminder_Task</flowApiName>
+    <label>T02 Owner inactive: no reminder task</label>
+    <testPoints>
+        <elementApiName>Start</elementApiName>
+        <isUseMockOutput>false</isUseMockOutput>
+        <parameters>
+            <leftValueReference>OpportunityId</leftValueReference>
+            <type>InputVariable</type>
+            <value>
+                <stringValue>REPLACE_WITH_ID_open_Opportunity_with_inactive_owner</stringValue>
+            </value>
+        </parameters>
+        <parameters>
+            <leftValueReference>ReminderSubject</leftValueReference>
+            <type>InputVariable</type>
+            <value>
+                <stringValue>Call the customer about the renewal</stringValue>
+            </value>
+        </parameters>
+    </testPoints>
+    <testPoints>
+        <assertions>
+            <conditions>
+                <leftValueReference>Assignee_Is_Active</leftValueReference>
+                <operator>NotEqualTo</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <errorMessage>The "Assignee is active" outcome should not be taken</errorMessage>
+        </assertions>
+        <assertions>
+            <conditions>
+                <leftValueReference>Create_Reminder_Task</leftValueReference>
+                <operator>WasVisited</operator>
+                <rightValue>
+                    <booleanValue>false</booleanValue>
+                </rightValue>
+            </conditions>
+            <errorMessage>No reminder task should be created for an inactive owner</errorMessage>
+        </assertions>
+        <elementApiName>Finish</elementApiName>
+        <isUseMockOutput>false</isUseMockOutput>
+    </testPoints>
+    <testType>WithAssertion</testType>
+</FlowTest>

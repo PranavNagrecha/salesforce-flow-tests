@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FlowTest xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>An open, unlocked case moves to Escalated: Needs Review is ticked. Twin: T04, where the case is already Escalated and only the priority changes, so nothing is ticked.</description>
+    <flowApiName>Case_Set_Review_Flag</flowApiName>
+    <label>T03 Update: status moves to Escalated, Needs Review ticked</label>
+    <testPoints>
+        <elementApiName>Start</elementApiName>
+        <isUseMockOutput>false</isUseMockOutput>
+        <parameters>
+            <leftValueReference>$Record</leftValueReference>
+            <type>InputTriggeringRecordInitial</type>
+            <value>
+                <sobjectValue>{"Status": "Working", "Locked__c": false, "Needs_Review__c": false}</sobjectValue>
+            </value>
+        </parameters>
+        <parameters>
+            <leftValueReference>$Record</leftValueReference>
+            <type>InputTriggeringRecordUpdated</type>
+            <value>
+                <sobjectValue>{"Status": "Escalated", "Locked__c": false, "Needs_Review__c": false}</sobjectValue>
+            </value>
+        </parameters>
+    </testPoints>
+    <testPoints>
+        <assertions>
+            <conditions>
+                <leftValueReference>$Record.Needs_Review__c</leftValueReference>
+                <operator>EqualTo</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <errorMessage>Needs Review should be ticked when the status moves to Escalated</errorMessage>
+        </assertions>
+        <assertions>
+            <conditions>
+                <leftValueReference>Ask_For_Review</leftValueReference>
+                <operator>EqualTo</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <errorMessage>The "Ask for review" outcome should be taken</errorMessage>
+        </assertions>
+        <assertions>
+            <conditions>
+                <leftValueReference>Not_Eligible</leftValueReference>
+                <operator>NotEqualTo</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <errorMessage>The "Not eligible" outcome should not be taken</errorMessage>
+        </assertions>
+        <elementApiName>Finish</elementApiName>
+        <isUseMockOutput>false</isUseMockOutput>
+    </testPoints>
+    <testType>WithAssertion</testType>
+</FlowTest>
