@@ -4,6 +4,8 @@ A Claude skill and three prompts for writing, running and reviewing Salesforce F
 
 A Flow Test is a saved check on a flow: a starting record, and a list of things that must be true when the flow finishes. This repository holds what one team learned from writing 175 of them with AI agents: the method, the platform facts that broke real tests (with the exact error messages), and prompts that were tried on real flows and scored.
 
+The full write-up is on Medium: [Salesforce Flow Tests: What Breaks Them, and AI Prompts That Write Them](https://medium.com/@ifxubc/salesforce-flow-tests-what-breaks-them-and-ai-prompts-that-write-them-168a8295951b)
+
 ## Who this is for
 
 - Salesforce admins and developers who build record-triggered or autolaunched flows and want them tested.
