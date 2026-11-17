@@ -1,0 +1,10 @@
+{
+  "name": "salesforce-flow-tests",
+  "version": "1.1.0",
+  "description": "Let Claude do the dull part of testing a Salesforce flow: list every path in plain words, write a Flow Test for each one, and review tests for the paths nobody covered.",
+  "author": { "name": "Pranav Nagrecha" },
+  "homepage": "https://github.com/PranavNagrecha/salesforce-flow-tests",
+  "repository": "https://github.com/PranavNagrecha/salesforce-flow-tests",
+  "license": "MIT",
+  "keywords": ["salesforce", "flow", "flow-tests", "testing"]
+}

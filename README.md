@@ -1,82 +1,109 @@
 # Salesforce Flow Tests with Claude
 
-A Claude skill and three prompts for writing, running and reviewing Salesforce Flow Tests.
+Let an AI do the dull part of testing your flows, so the testing actually gets done.
 
-A Flow Test is a saved check on a flow: a starting record, and a list of things that must be true when the flow finishes. This repository holds what one team learned from writing 175 of them with AI agents: the method, the platform facts that broke real tests (with the exact error messages), and prompts that were tried on real flows and scored.
+Most flows are tested by clicking Debug, looking at the result, and doing it again after every change. Salesforce has a better tool, Flow Tests, and few people use it, because writing a test for every path of a flow is slow, repetitive work.
+
+That kind of work is what an AI assistant is good at. This repository gives Claude the method and the platform knowledge to do it:
+
+1. **Read a flow and list every path through it, in plain words.** You check the list against what the flow is meant to do.
+2. **Write a Flow Test for each path.** One first, which you run, then the rest.
+3. **Review a set of tests** and point out the paths nobody covered.
+
+You stay in charge of the judgement: what the flow should do, and whether the tests prove it. Claude does the typing.
 
 The full write-up is on Medium: [Salesforce Flow Tests: What Breaks Them, and AI Prompts That Write Them](https://medium.com/@ifxubc/salesforce-flow-tests-what-breaks-them-and-ai-prompts-that-write-them-168a8295951b)
 
-## Who this is for
+## What is a Flow Test?
 
-- Salesforce admins and developers who build record-triggered or autolaunched flows and want them tested.
-- Anyone using Claude to help with Salesforce work.
-- AI agents: the skill file is written to be read by one.
+A saved check that lives with a flow. You give it a starting record (a Case with Status = Working) and say what must be true after the flow runs (Needs Review is ticked, the "Ask for review" path was taken). Salesforce runs it and reports pass or fail. The record is never saved.
 
-The prompts were tried with an agent that can read and write files (Claude Code). In a plain Claude chat the same steps apply, pasting the flow's XML in, but that path has not been tried.
+Next month, when someone changes the flow, you run the tests again and know in seconds whether something that used to work is now broken.
+
+Flow Tests work for record-triggered, autolaunched and Data Cloud-triggered flows. In Flow Builder they are under **View Tests**, or **Test Mode** from the Winter '27 release on.
+
+## Install
+
+### Claude Code: one command, the same on Windows and Mac
+
+Inside Claude Code, type:
+
+```
+/plugin install salesforce-flow-tests --marketplace PranavNagrecha/salesforce-flow-tests
+```
+
+Or from a terminal (PowerShell on Windows, Terminal on Mac):
+
+```
+claude plugin install salesforce-flow-tests --marketplace PranavNagrecha/salesforce-flow-tests
+```
+
+Then restart Claude Code. Type `/salesforce-flow-tests` and the three commands appear.
+
+This needs Claude Code 2.1.275 or later. On an older version, run these two inside Claude Code instead:
+
+```
+/plugin marketplace add PranavNagrecha/salesforce-flow-tests
+/plugin install salesforce-flow-tests@salesforce-flow-tests
+```
+
+The plugin is text files only: no scripts, nothing to compile, no path that belongs to one operating system. The install was run and checked on a Mac. It has not yet been run on Windows by the author. If it fails there, please open an issue with the message you saw.
+
+### Any Claude chat: copy a prompt
+
+No install. Open the three files in [prompts/](prompts/), fill in the lines in square brackets, and paste.
+
+## Use it
+
+Open your Salesforce project in Claude Code and run the three steps in order.
+
+**Step 1. Understand the flow.**
+
+```
+/salesforce-flow-tests:flow-paths force-app/main/default/flows/My_Flow.flow-meta.xml
+```
+
+You get a plain-words summary, a table with one row per path, and a list of questions about things the flow file does not show (custom metadata, formulas, picklist values). Read the table against what the flow is meant to do. Add the requirement after the file path if you have one.
+
+**Step 2. Write the tests.**
+
+```
+/salesforce-flow-tests:flow-tests <your answers to the questions> <your sandbox alias>
+```
+
+Claude writes one test and stops. Deploy it and run it in a sandbox. When it passes, say so, and Claude writes the rest, plus one control test that is meant to fail.
+
+**Step 3. Review.** In a new conversation:
+
+```
+/salesforce-flow-tests:flow-review force-app/main/default/flows/My_Flow.flow-meta.xml
+```
+
+It lists the flow's paths for itself, traces each test by hand, and reports paths with no test, tests that would pass on a broken flow, and record Ids that will not exist in the next org.
+
+You can also skip the commands and just ask: "write Flow Tests for this flow". The plugin's skill loads on its own.
+
+### Try it in one minute
+
+This repository has a made-up flow you can practise on. Clone it, open the folder in Claude Code with the plugin installed, and run:
+
+```
+/salesforce-flow-tests:flow-paths examples/flows/Case_Set_Review_Flag.flow-meta.xml
+```
+
+In about a minute you get a plain-words summary, a table of the flow's ten paths, and a list of questions. Three of those questions are about the flow's design, not its tests: for example, whether a case that leaves Escalated and comes back should be flagged again. The unedited output of that run is in [examples/sample-output-flow-paths.md](examples/sample-output-flow-paths.md), and the matching example tests are in [examples/](examples/README.md).
 
 ## What is in here
 
 | Path | What it is |
 |---|---|
-| [skills/salesforce-flow-tests/SKILL.md](skills/salesforce-flow-tests/SKILL.md) | The skill: the method, what a Flow Test cannot prove, the platform facts, the file shape, the commands |
-| [prompts/01-understand-the-flow.md](prompts/01-understand-the-flow.md) | Prompt 1: a plain-words summary and a table of every path through a flow |
-| [prompts/02-write-the-tests.md](prompts/02-write-the-tests.md) | Prompt 2: one Flow Test file per path |
-| [prompts/03-review-the-tests.md](prompts/03-review-the-tests.md) | Prompt 3: an independent review of a set of Flow Tests |
-| [examples/](examples/README.md) | Four example test files showing the shapes that work |
-| [docs/how-the-prompts-were-tested.md](docs/how-the-prompts-were-tested.md) | The trials, the scores, and what is still unproven |
+| [commands/](commands/) | The three slash commands |
+| [skills/salesforce-flow-tests/SKILL.md](skills/salesforce-flow-tests/SKILL.md) | The skill: the method, what to do when a test goes red, what a Flow Test cannot prove, platform behaviours that break tests, the file shape, the CLI commands |
+| [prompts/](prompts/) | The same three steps as copy-and-paste prompts for a chat window |
+| [examples/](examples/README.md) | A sample flow and four example test files |
+| [docs/how-the-prompts-were-tested.md](docs/how-the-prompts-were-tested.md) | How the prompts were tried and scored, and what is still unproven |
 
-## Quick start
-
-### With the prompts
-
-1. Open [Prompt 1](prompts/01-understand-the-flow.md). Fill in the flow's API name, give it the flow's XML, and send it.
-2. Read the path table it gives you against your requirement. Answer its questions.
-3. Send [Prompt 2](prompts/02-write-the-tests.md) with your answers. It writes one test and stops.
-4. Deploy that one test and run it. When it passes, say so, and Claude writes the rest.
-5. Open a new conversation and send [Prompt 3](prompts/03-review-the-tests.md) with the flow and the tests.
-
-### With the skill, in Claude Code
-
-Copy the skill folder into your Salesforce project, or into your home folder to use it everywhere.
-
-Mac or Linux:
-
-```bash
-# this project only
-mkdir -p .claude/skills
-cp -R skills/salesforce-flow-tests .claude/skills/
-
-# every project on this machine
-mkdir -p ~/.claude/skills
-cp -R skills/salesforce-flow-tests ~/.claude/skills/
-```
-
-Windows (PowerShell):
-
-```powershell
-# this project only
-New-Item -ItemType Directory -Force .claude\skills | Out-Null
-Copy-Item -Recurse skills\salesforce-flow-tests .claude\skills\
-
-# every project on this machine
-New-Item -ItemType Directory -Force $HOME\.claude\skills | Out-Null
-Copy-Item -Recurse skills\salesforce-flow-tests $HOME\.claude\skills\
-```
-
-Then ask Claude to "write Flow Tests for" a flow in your project. The Windows commands have not been run by the author; if one fails, please open an issue.
-
-## The method in eight steps
-
-1. Get the flow's API name from the person or the file name. It is not inside the XML.
-2. Write a path table before any test: every way into the flow, every Decision outcome including defaults, every list value, every Get Records found and not found.
-3. Ask about what the XML does not show (custom metadata, formulas, picklist values). Do not guess.
-4. Have a person read the table against the requirement.
-5. Write one test, deploy it, run it. Then write the rest.
-6. Add a control test that must fail, run it once, delete it.
-7. Run the tests, then count how many ran.
-8. Review independently, from the flow XML and the tests alone.
-
-## Running the tests
+## Running the tests yourself
 
 Flow Tests are metadata files. In a Salesforce DX project they live in `force-app/main/default/flowtests/` and end in `.flowtest-meta.xml` (lower-case t).
 
@@ -90,6 +117,23 @@ sf flow run test --target-org ORG_ALIAS --class-names FLOW_API_NAME --synchronou
 
 Replace `ORG_ALIAS` with your sandbox alias and `FLOW_API_NAME` with the flow's API name. Always name the org. Use a sandbox.
 
+## When a test goes red
+
+The expected behaviour lives in the requirement, not in the flow and not in the test.
+
+- If the flow no longer does what the requirement says, fix the flow.
+- If the flow is right because the requirement changed, change the requirement first, with a name and a date. Then change the test.
+- The person who edited the flow does not decide alone that the test is out of date.
+- Never delete a test without naming what now proves that path.
+
+Changing a test until it passes proves nothing.
+
+## What the AI cannot do for you
+
+- **It cannot see outside the flow file.** Custom metadata, formula definitions and picklist values are not in the XML. The prompts make Claude ask instead of guess. Answer the questions.
+- **It cannot run anything in your org unless you let it.** Run the first test yourself before trusting the rest.
+- **It can be wrong.** In the trials it sometimes left a path without a test or wrote a check in a form that had not been proven. That is what step 3 and the one-test-first rule are for.
+
 ## What a Flow Test cannot prove
 
 - Screen flows and scheduled flows
@@ -97,35 +141,24 @@ Replace `ORG_ALIAS` with your sandbox alias and `FLOW_API_NAME` with the flow's 
 - A flow that runs only on delete
 - Anything that depends on who is running the flow (a permission, a bypass, a profile)
 - A flow that should not start (a record that misses the start condition)
-- A subflow with a collection input, in the orgs where this was tried
+- A subflow with a collection input, where this was tried
 - Fault paths, unless an input can cause the failure
 - Bulk behaviour
 - What the person sees on the screen
 
 The skill file says what to use instead for each. Flow Tests show the logic does what the test says. They do not replace a person using the feature as the real user.
 
-## How well do the prompts work?
+## How well does it work?
 
-They were tried six times by a fresh AI agent (Claude Sonnet) that was given only the prompts and a real flow, and graded against tests a team already runs for that flow. Ten yes-or-no checks each time.
+The prompts were tried over several rounds by a fresh AI agent that was given only the prompts and a real flow. Each result was graded with ten yes-or-no checks against an existing, passing test suite for that flow. Scores ran from 8 to 10 out of 10 over seven rounds. They did not climb steadily: a wording change that fixed one thing sometimes broke another, which is why every change is now re-run before it is published.
 
-| Round | Record-triggered flow | Subflow | What happened |
-|---|---|---|---|
-| 1 | 8 of 10 | | The files would probably not have run: wrong flow name, wrong form for outcomes |
-| 2 | 8 of 10 | | Round 1 faults fixed; too few fields checked |
-| 3 | 9 of 10 | | Round 2 faults fixed |
-| 4 | | 9 of 10 | Same prompts as round 3, on a different kind of flow |
-| 5 | 8 of 10 | 8 of 10 | A new sentence made the model drop tests it should have written |
-| 6 | 9 of 10 | 8 of 10 | That sentence reworded; the subflow still lost its error-path test |
+The rounds, the scores and the known weak spots are in [docs/how-the-prompts-were-tested.md](docs/how-the-prompts-were-tested.md).
 
-The scores moved between 8 and 9. They did not climb steadily: a change that fixed one thing sometimes broke another.
+## Limits
 
-The trial files were traced by hand and compared with accepted tests. They were not deployed to an org. Details are in [docs/how-the-prompts-were-tested.md](docs/how-the-prompts-were-tested.md).
-
-## Limits of this repository
-
-- The platform facts were observed in Salesforce sandboxes on API version 68 in late 2026. They are observations, not Salesforce documentation. Where a fact here disagrees with your org, trust your org.
+- The platform behaviours listed in the skill were observed in Salesforce sandboxes on API version 68 in late 2026. They are observations, not Salesforce documentation. Where one disagrees with your org, trust your org.
 - The Winter '27 release introduced Test Mode, which calls a test a "test scenario". Your screens may not match older tutorials.
-- The example test files show working shapes. They belong to made-up flows and will not deploy as they are.
+- The sample flow and example tests are made up. They have not been deployed to an org.
 - This is a personal project. It is not a Salesforce product and is not affiliated with Salesforce, Anthropic or the author's employer.
 
 ## Official documentation
@@ -137,7 +170,7 @@ The trial files were traced by hand and compared with accepted tests. They were 
 
 ## Found something wrong?
 
-Open an issue with the fact, what you saw instead, your API version, and the exact error message if there was one. Corrections from other orgs are the most useful contribution.
+Open an issue with what you saw, your API version, and the exact error message if there was one. A behaviour that differs in your org is the most useful thing you can report.
 
 ## License
 

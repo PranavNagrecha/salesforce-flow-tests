@@ -1,0 +1,12 @@
+{
+  "name": "salesforce-flow-tests",
+  "owner": { "name": "Pranav Nagrecha" },
+  "description": "A Claude Code plugin for writing, running and reviewing Salesforce Flow Tests.",
+  "plugins": [
+    {
+      "name": "salesforce-flow-tests",
+      "source": "./",
+      "description": "Let Claude do the dull part of testing a Salesforce flow: list every path in plain words, write a Flow Test for each one, and review tests for the paths nobody covered."
+    }
+  ]
+}

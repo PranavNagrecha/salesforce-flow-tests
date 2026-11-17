@@ -28,7 +28,7 @@ What every test asserts:
 - The outcome taken: the outcome's own API name, alone, EqualTo true. No Decision name in front, no dot, no $.
 - Each named outcome that must not be taken: NotEqualTo true. EqualTo false works only when the Decision evaluated that outcome and fails when the flow never reached it, so NotEqualTo true is the safe form. A default outcome has no API name; prove it by asserting every named outcome of that Decision NotEqualTo true.
 - A field that must be blank: IsNull true. An element that must run or must not run (a Create Records, an action, a subflow): its API name, WasVisited true or false.
-A test that checks only what every path sets the same way passes on every path, so never rely on one. Two tests that differ only in a field the flow never reads are one test. Each error message says what should have happened. The description says, in admin words, the situation, what should happen and which row is its twin. The label starts with the row id and stays short.
+A test that checks only what every path sets the same way passes on every path, so never rely on one. Two tests that differ only in a field the flow never reads are one test. Each error message says what should have happened. The description says, in admin words, the situation, what should happen and which row is its twin. If I gave you the requirement, it also names the part of the requirement this test proves, so the next person can see where the expected result was decided. The label starts with the row id and stays short.
 
 Use this shape, and only these element names:
 
